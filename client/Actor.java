@@ -1,5 +1,7 @@
 package chess.client;
 
+import java.io.IOException;
+
 public interface Actor {
-    String sendCommand();
+    String sendCommand() throws IOException;
 }

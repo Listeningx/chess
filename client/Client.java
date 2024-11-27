@@ -2,9 +2,12 @@ package chess.client;
 
 import chess.backend.*;
 
+import java.io.*;
+import java.util.*;
+
+
 import java.util.Arrays;
 import java.util.List;
-import java.util.Scanner;
 
 public class Client {
     private Manager manager;
@@ -12,7 +15,9 @@ public class Client {
     private boolean hint = true;
     private boolean checkNow = false;
 
-    public void run() {
+
+
+    public void run(String commandFilePath) {
         // 初始化游戏
         System.out.println("====游戏对战平台已开启====");
         System.out.println("请选择游戏类型: 0. 五子棋 1. 围棋");
@@ -29,6 +34,14 @@ public class Client {
         Person black = new Person();
         Person white = new Person();
         String lastCommand = null;
+        File file = new File(commandFilePath);
+        Scanner scanner_= null;
+        try {
+            scanner_ = new Scanner(file);
+        }catch (FileNotFoundException e) {
+            // 如果文件没有找到，则输出错误信息
+            System.out.println("File not found: " + e.getMessage());
+        }
         while (true) {
             if (hint) {
                 System.out.println("command: ");
@@ -43,13 +56,21 @@ public class Client {
                 System.out.println("unstep --虚着不落子");
             }
             int flag = manager.getState().getFlag();
+
+
+
             String command = null;
             if (flag == Round.BLACK) {
-                command = black.sendCommand();
+                if (scanner_ != null) {
+                    command = black.sendCommand(scanner_);
+                }
             } else {
-                command = white.sendCommand();
+                if (scanner_ != null) {
+                    command = white.sendCommand(scanner_);
+                }
             }
             checkNow = command.equals(lastCommand) && command.equals("unstep"); //出现双方都不落子, 则进行胜负判定
+
             boolean res = execute(command);
 
             lastCommand = String.valueOf(command); // 记录上一条命令
@@ -67,12 +88,15 @@ public class Client {
 //            System.out.println("==========");
             if (res) break;
         }
+
+
     }
 
     public boolean execute(String command) {
         /*
             根据命令执行结果是否返回true, 判断是否结束程序运行
          */
+        if(Objects.equals(command, "")) return true;
         List<String> args = split(command);
         String name = args.get(0); // 命令类型
         if (name.equals("remake")) {
